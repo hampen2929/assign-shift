@@ -1,6 +1,8 @@
+import argparse
+import json
 from collections import defaultdict
 import random
-from loguru import logger
+
 
 def assign_shift(target_days: list[int], employees: dict[str, list[int]]) -> dict[str, int]:
     shift_schedule = {k: [] for k in employees.keys()}
@@ -21,7 +23,7 @@ def assign_shift(target_days: list[int], employees: dict[str, list[int]]) -> dic
             if ok_flag:
                 break
         if not ok_flag:
-            logger.warning(f"target_day: {target_day} is off day for all employees.")
+            print(f"Target_day({target_day}) is off day for all employees.")
             not_assigned_days.append(target_day)
 
     return shift_schedule, not_assigned_days
@@ -33,15 +35,18 @@ def validate(shift_schedule):
     diff = max(shift_counts) - min(shift_counts)
     assert 0 <= diff <= 1, f"diff: {diff}"
 
-def main():
-    target_days = [2, 3, 9, 10, 16, 17, 20, 23, 24, 30, 31]
-    employees = {"A": [2, 3], "B": [4], "C": []}
-    shift_schedule, not_assigned_days = assign_shift(target_days, employees)
+def main(args: argparse.Namespace):
+    employees = json.loads(args.employees)
+    shift_schedule, not_assigned_days = assign_shift(args.target_days, employees)
     if len(not_assigned_days):
-        logger.warning(f"NOT all target_days are assigned.({not_assigned_days})")
+        print(f"{not_assigned_days} are NOT assigned.")
     else:
-        logger.info("All target_days are assigned!")
-    logger.info(shift_schedule)
+        print("All target_days are assigned!")
+    print(shift_schedule)
 
 if __name__ == "__main__":
-    main()
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("--target_days", type=int, nargs="+")
+    argparser.add_argument("--employees", type=str, help="json file path")
+    args = argparser.parse_args()
+    main(args)
