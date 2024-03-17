@@ -4,7 +4,7 @@ from collections import defaultdict
 import random
 
 
-def assign_shift(target_days: list[int], employees: dict[str, list[int]]) -> dict[str, int]:
+def assign_shift(target_days: list[int], employees: dict[str, list[int]]) -> tuple[dict[str, int], list[int]]:
     shift_schedule = {k: [] for k in employees.keys()}
     not_assigned_days = []
     for target_day in target_days:
@@ -28,14 +28,14 @@ def assign_shift(target_days: list[int], employees: dict[str, list[int]]) -> dic
 
     return shift_schedule, not_assigned_days
 
-def validate(shift_schedule):
+def validate(shift_schedule: dict[str, list[int]]):
     shift_counts = defaultdict(list)
     for v in shift_schedule.values():
         shift_counts[len(v)].append(v)
     diff = max(shift_counts) - min(shift_counts)
     assert 0 <= diff <= 1, f"diff: {diff}"
 
-def main(args: argparse.Namespace):
+def main(args: argparse.Namespace) -> None:
     employees = json.loads(args.employees)
     shift_schedule, not_assigned_days = assign_shift(args.target_days, employees)
     if len(not_assigned_days):
